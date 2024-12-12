@@ -70,11 +70,11 @@ fastboot flashall -S 50M -w
 
 ## 用法
 直接打开系统中集成的”合规检测APP“ ，按着下图中的流程进行操作即可开始检测
- ![](upload/attach/202412/452101_AWMEK5DQ5CDWU4V.webp)
+ ![](https://github.com/aylhex/hegui_rom/blob/main/aosp_rom/hegui.png)
 保证电脑和手机处于同一局域网下，即手机和电脑连接同一个wifi，在电脑的浏览器中输入APP中网址：`http://192.168.xxx.xxx:8080/`，即可看到检测结果
- ![](upload/attach/202412/452101_A8JXFNRYBMUEEQU.webp)
+ ![](https://github.com/aylhex/hegui_rom/blob/main/aosp_rom/loginfo.png)
 点击详情，即可查看具体的调用堆栈
- ![](upload/attach/202412/452101_U23Y5AG3897VNJY.webp)
+ ![](https://github.com/aylhex/hegui_rom/blob/main/aosp_rom/callstack.png)
 ## 后续
 计划会增加第三方SDK的识别和检测，同时增加更多功能比如采集频率的统计和新检测点，比如：模拟OAID的获取。(因为不是专职搞这个，更新频率可能会有点慢)
 
