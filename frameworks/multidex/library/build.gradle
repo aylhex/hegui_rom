@@ -1,0 +1,107 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.library'
+
+def generatedResourceDir = project.file('generatedResource')
+def versionFile = new File(generatedResourceDir, 'androidsupportmultidexversion.txt')
+
+task makeVersionFile(type:Exec) {
+
+    doFirst {
+        versionFile.getParentFile().mkdirs()
+    }
+
+    outputs.files versionFile
+
+    commandLine 'sh', '-c', 'git log --format="%H" -n 1 || (echo git hash not available; exit 0)'
+    standardOutput = new ByteArrayOutputStream()
+
+    doLast {
+        versionFile.text = "git.version=" + standardOutput.toString()
+    }
+}
+
+android {
+    compileSdkVersion gradle.currentSdk
+
+    defaultConfig {
+        minSdkVersion 4
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs         = ['src']
+            resources.srcDirs    = ['res', makeVersionFile.outputs]
+            res.srcDirs          = ['src']
+            manifest.srcFile 'AndroidManifest.xml'
+        }
+    }
+}
+
+android.libraryVariants.all { variant ->
+    variant.getJavaCompiler().dependsOn(makeVersionFile)
+
+    if (!name.equals(com.android.builder.core.BuilderConstants.RELEASE)) {
+        return // Skip non-release
+    }
+
+
+    def sourceJar = project.tasks.create(name: "sourceJarRelease", type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+    artifacts.add("archives", sourceJar)
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri(rootProject.ext.supportRepoOut)) {
+            }
+
+            pom.project {
+                name 'Android Multi-Dex Library'
+                description "Library for legacy multi-dex support"
+                url ''
+                inceptionYear '2013'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                scm {
+                    url "http://source.android.com"
+                    connection "scm:git:https://android.googlesource.com/platform/frameworks/multidex"
+                }
+                developers {
+                    developer {
+                        name 'The Android Open Source Project'
+                    }
+                }
+            }
+        }
+    }
+}

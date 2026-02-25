@@ -1,0 +1,13 @@
+{
+  "presubmit": [
+    {
+      "name": "apex_targetprep_tests"
+    },
+    {
+      "name": "timezone_data_e2e_tests"
+    },
+    {
+      "name": "CtsStagedInstallHostTestCases"
+    }
+  ]
+}

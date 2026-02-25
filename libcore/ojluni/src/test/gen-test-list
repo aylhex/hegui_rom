@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+# Copyright (C) 2016 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+###
+### Scan this directory for any testng classes
+### Outputs a testng.xml formatted list of classes
+###
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+test_property_files="$(find "$DIR" -name TEST.properties)"
+
+function debug_print {
+  if [[ $DEBUG == "true" ]]; then
+    echo "DEBUG:" "$@" >& 2
+  fi
+}
+
+function error_print {
+  echo "ERROR:" "$@" >& 2
+  exit 1
+}
+
+function class_name_from_class_file {
+  # Reads a list of .java files from stdin, spits out their fully qualified class name.
+  local file_name
+  local package_string
+  local package_name
+  local class_name
+  while read file_name; do
+    package_string="$(grep "package" "$file_name")"
+    [[ $? -ne 0 ]] && error_print "File $file_name missing package declaration."
+    debug_print "File: $file_name"
+
+    # Parse the package name by looking inside of the file.
+    package_name=${package_string#package[[:space:]]*}  # remove package followed by any spaces
+    package_name=${package_name%;} # remove semicolon at the end
+
+    # Assumes class name == file name. Almost always the case.
+    class_name="$(basename "$file_name")"
+    class_name="${class_name%.java}" # remove ".java" from the end
+    debug_print "Package: <$package_name>"
+
+    echo "$package_name.$class_name"
+  done
+}
+
+function list_classes_in_dir {
+  find "$1" -name "*.java" | class_name_from_class_file
+}
+
+function list_all_classes {
+  local file
+  for file in $test_property_files; do
+    debug_print "File: $file"
+
+    if ! grep "TestNG.dirs" "$file" > /dev/null; then
+      continue
+    fi
+
+    debug_print "Has TestNG files"
+
+    list_classes_in_dir "$(dirname "$file")"
+  done
+}
+
+function class_name_to_testng_entry {
+  local class_name
+  while read class_name; do
+    echo "<class name=\"$class_name\" />"
+  done
+}
+
+list_all_classes | class_name_to_testng_entry

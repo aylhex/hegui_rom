@@ -1,0 +1,20 @@
+# Use this reviewer by default.
+android-libcore-team+review@google.com
+
+# People who can approve changes for submission; don't send review emails to them
+# unless you know what you're doing.
+flooey@google.com
+narayan@google.com
+nfuller@google.com
+nikitai@google.com
+paulduffin@google.com
+peteg@google.com
+prb@google.com
+tobiast@google.com
+vichang@google.com
+
+# Don't send these folks any review emails for this project.
+ngeoffray@google.com
+sehr@google.com
+vmarko@google.com
+dbrazdil@google.com

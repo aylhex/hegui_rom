@@ -1,0 +1,4 @@
+EXTRA_CMDS=''
+KERNEL_DIR=common
+CLANG_PREBUILT_BIN=prebuilts-master/clang/host/linux-x86/clang-r349610/bin
+STOP_SHIP_TRACEPRINTK=1

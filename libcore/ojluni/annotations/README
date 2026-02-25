@@ -1,0 +1,40 @@
+This directory contains annotated stub files which can be merged into
+the main source files by metalava when it is producing API stubs. This
+mechanism is used instead of adding the annotations to the main source
+files, to avoid carrying patches against the upstream sources.
+
+Directory structure
+===================
+
+libcore/ojluni/annotations/sdk:
+ - Contains annotations to be included in the public SDK, for example
+   annotations specifying additional details about method contracts.
+
+libcore/ojluni/annotations/sdk/nullability:
+ - Contains annotations to be included in the public SDK specifically
+   relating to nullability. Adding an annotated stub file to this subdirectory
+   will cause the annotations to be validated for correctness and completeness.
+ - To add some new files under this directory:
+   1. make openjdk-sdk-stubs-no-javadoc
+   2. for FILE in your/package/and/Class.java another/package/AnotherClass.java; do mkdir -p libcore/ojluni/annotations/sdk/nullability/$(dirname ${FILE}) && cp out/soong/.intermediates/libcore/openjdk-sdk-stubs-no-javadoc/android_common/stubsDir/${FILE} libcore/ojluni/annotations/sdk/nullability/${FILE/%.java/.annotated.java}; done
+   3. Add nullability annotations to the new files.
+ - To see the effect of the files under this directory:
+   1. make api-stubs-docs
+   2. Look for the file under out/soong/.intermediates/frameworks/base/api-stubs-docs/android_common/stubsDir/
+
+libcore/ojluni/annotations/mmodule:
+ - Contains annotations which determine what is included in the core-platform
+   and intra-core APIs. See the documentation in libcore/openjdk_java_files.bp.
+ - To add some new files under this directory:
+   1. In libcore/openjdk_java_files.bp, move the files from the
+      openjdk_internal_files filegroup to openjdk_mmodule_extra_files. *DO NOT*
+      check in this change, it will have undesirable consequences until you
+      reach step 4, below.
+   2. make openjdk-mmodule-stubs-no-javadoc
+   3. FILES="your/package/and/Class.java another/package/AnotherClass.java"; for FILE in $FILES; do mkdir -p libcore/ojluni/annotations/mmodule/$(dirname ${FILE}) && cp out/soong/.intermediates/libcore/openjdk-mmodule-stubs-no-javadoc/android_common/stubsDir/${FILE} libcore/ojluni/annotations/mmodule/${FILE/%.java/.annotated.java}; done
+   4. Add @libcore.api.Hide to each top-level class in the new files. This will prevent it from being added to the public API. A JavaDoc @hide tag will not work as metalava will ignore javadoc from the stub files.
+   5. Add @libcore.api.CorePlatformApi and @libcore.api.IntraCoreApi as desired
+      to the classes and members.
+ - To see the effect of the files under this directory:
+   1. make make core-platform-api-stubs core-intra-stubs
+   2. Look for the files under out/soong/.intermediates/libcore/mmodules/core_platform_api/core-platform-api-stubs/android_common/stubsDir/ and out/soong/.intermediates/libcore/mmodules/intracoreapi/core-intra-stubs/android_common/stubsDir

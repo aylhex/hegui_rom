@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+
+# Copyright (C) 2016 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+
+###
+### Change the BOOTCLASSPATH to pick up bootlib classes.
+### Export ANDROID_DATA=something else (it should have dalvik-cache dir in it)
+### Point the image to something else that's not existing.
+###
+### Actually run dalvikvm now...
+###
+
+if [[ -z $ANDROID_BUILD_TOP ]]; then
+  echo "Run source build/envsetup.sh first" >& 2
+  exit 1
+fi
+
+invoke_with=
+DALVIKVM=dalvikvm
+LIBART=libart.so
+
+function follow_links() {
+  if [ z"$BASH_SOURCE" != z ]; then
+    file="$BASH_SOURCE"
+  else
+    file="$0"
+  fi
+  while [ -h "$file" ]; do
+    # On Mac OS, readlink -f doesn't work.
+    file="$(readlink "$file")"
+  done
+  echo "$file"
+}
+
+function find_libdir() {
+  # Use realpath instead of readlink because Android does not have a readlink.
+  if [ "$(realpath "$ANDROID_ROOT/bin/$DALVIKVM")" = "$(realpath "$ANDROID_ROOT/bin/dalvikvm64")" ]; then
+    echo "lib64"
+  else
+    echo "lib"
+  fi
+}
+
+function join { local IFS="$1"; shift; echo "$*"; }
+
+PROG_NAME="$(follow_links)"
+PROG_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+
+if [[ -z $ANDROID_ROOT ]]; then
+  # Already set to /system for actual android devices
+  ANDROID_ROOT="$ANDROID_HOST_OUT"
+fi
+LIBDIR="$(find_libdir)"
+LD_LIBRARY_PATH="$ANDROID_ROOT/$LIBDIR"
+DEBUG_OPTION=""
+
+DELETE_ANDROID_DATA=false
+# If ANDROID_DATA is the system ANDROID_DATA or is not set, use our own,
+# and ensure we delete it at the end.
+if [ "$ANDROID_DATA" = "/data" ] || [ "$ANDROID_DATA" = "" ]; then
+  # TODO: use /data/tmp/... for android, and mktemp for host
+  #ANDROID_DATA=$PWD/android-data$$
+  ANDROID_DATA="$(mktemp -q -d -t "$(basename "$0").XXXXXX")"
+  IMAGE_DIRECTORY="$ANDROID_DATA/image"
+  mkdir -p $ANDROID_DATA/dalvik-cache/{arm,arm64,x86,x86_64}
+  mkdir -p $IMAGE_DIRECTORY
+  DELETE_ANDROID_DATA=true
+fi
+
+# Clean up the temporary files we made earlier on.
+function finish {
+  if $DELETE_ANDROID_DATA; then
+    [[ -d $ANDROID_DATA ]] && rm -rf "$ANDROID_DATA"
+  fi
+}
+
+trap finish EXIT
+
+# Dummy image location name. Art ignores the bootclasspath setting if a boot image
+# already exists, so we force it to create a new boot image with our correct bootclasspath.
+IMAGE_LOCATION="$IMAGE_DIRECTORY/core-extrabootclasspath.art"
+
+# TODO: Get this list from somewhere else, a makefile perhaps?
+BOOT_DEXJARS=(
+bouncycastle-hostdex.jar
+apache-xml-hostdex.jar
+core-tests-hostdex.jar
+core-libart-hostdex.jar
+conscrypt-hostdex.jar
+core-ojtests-hostdex.jar  # This is the *one* addition that makes our OJ tests actually run. The rest of these are standard jars on the bootclasspath.
+core-oj-hostdex.jar
+okhttp-hostdex.jar)
+
+BOOT_DEXJAR_PREFIX="$ANDROID_ROOT/framework"
+
+BOOT_DEXJARS_ABS=()
+for dexjar in ${BOOT_DEXJARS[@]}; do
+  BOOT_DEXJARS_ABS=(${BOOT_DEXJARS_ABS[@]} $BOOT_DEXJAR_PREFIX/$dexjar)
+done
+
+export BOOTCLASSPATH=$(join ":" "${BOOT_DEXJARS_ABS[@]}") # a,b,c
+
+echo "BOOTCLASSPATH=$BOOTCLASSPATH"
+echo "PROG_NAME=$PROG_NAME"
+echo "PROG_DIR=$PROG_DIR"
+echo "ANDROID_ROOT=$ANDROID_ROOT"
+echo "LIBDIR=$LIBDIR"
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+echo "DEBUG_OPTION=$DEBUG_OPTION"
+
+echo "export BOOTCLASSPATH=$BOOTCLASSPATH"
+echo export ANDROID_ROOT="$ANDROID_ROOT"
+ANDROID_DATA=$ANDROID_DATA \
+  ANDROID_ROOT=$ANDROID_ROOT \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH \
+  PATH=$ANDROID_ROOT/bin:$PATH \
+  LD_USE_LOAD_BIAS=1 \
+  $invoke_with $ANDROID_ROOT/bin/$DALVIKVM $lib \
+    -XXlib:$LIBART \
+    -Xnorelocate \
+    -Ximage:$IMAGE_LOCATION \
+    $DEBUG_OPTION \
+    "$@"
+

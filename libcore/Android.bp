@@ -1,0 +1,17 @@
+build = [
+    "JavaLibrary.bp",
+    "NativeCode.bp",
+]
+
+genrule {
+    name: "notices-for-framework-stubs",
+    tool_files: [
+        "NOTICE",
+        "ojluni/NOTICE",
+    ],
+    cmd: "cp -f $(location NOTICE) $(genDir)/NOTICES/libcore-NOTICE && cp -f $(location ojluni/NOTICE) $(genDir)/NOTICES/ojluni-NOTICE",
+    out: [
+        "NOTICES/libcore-NOTICE",
+        "NOTICES/ojluni-NOTICE",
+    ],
+}

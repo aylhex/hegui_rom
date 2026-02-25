@@ -1,0 +1,42 @@
+The tools in this directory are a scheme for autogenerating crypto doc support.
+
+The central file is data/crypto_support.json, which is a JSON file that contains
+the supported API levels for each crypto algorithm that has ever been supported
+by Android.  The categories are identified as described in the JCA, along with
+a couple extra classes.
+
+Each algorithm has up to three properties:
+
+name - The name of the algorithm.  These are currently normalized to
+all-uppercase versions, but this produces substandard results in some cases
+(eg, PBEWITHHMACSHA versus PBEWithHmacSHA), so it could be improved.
+
+supported_api_levels: The set of Android API levels that this algorithm was/is
+supported for.  It should be a sequence of zero or more "N" values or "N-M"
+ranges separated by commas followed by a "N+" value if the algorithm is
+currently supported.  For example: "17+", "1-8,22+", "1-10,15,22-24".
+
+deprecated: Whether the algorithm is unsupported at the current API level.  This
+is equivalent to supported_api_levels.endswith('+'), but is included for
+clarity's sake.
+
+Updating the documentation is a three-step process: get the set of supported
+algorithms, update the data file, then generate HTML based on the data file.
+
+Getting the set of supported algorithms is done using
+src/java/libcore/java/security/ListProviders.java.  It's important that this is
+run using vogar in mode=activity rather than the default of mode=device, as
+the Android frameworks (in particular, Android Keystore) can add additional
+support.
+
+The data from ListProviders is fed into update_crypto_support.py, which rewrites
+the data file.  Any newly-added algorithms will be added to the file's data,
+and any newly-removed algorithms will have their supported API levels updated.
+
+The preceding two steps can be performed together by running
+run_update_crypto_support.sh.
+
+Finally, format_supported_algorithm_table.py reads the data file and outputs
+a collection of HTML tables suitable for copying-and-pasting into the docs
+to stdout.  Add --javadoc to produce output appropriate for inclusion in
+Javadoc.

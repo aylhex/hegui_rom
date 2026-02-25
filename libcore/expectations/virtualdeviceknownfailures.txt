@@ -1,0 +1,34 @@
+/*
+ * List of test cases known to fail on a virtual device.
+ */
+[
+{
+  description: "IPv6 connectivity not yet supported in virtual device testing infra",
+  result: EXEC_FAILED,
+  name: "libcore.java.net.SocketTest#testSocketTestAllAddresses",
+  bug: 30965313
+},
+{
+  description: "Virtual devices do not implement the SELinux policy (forbid hard link) asserted by this test",
+  name: "libcore.java.nio.file.Files2Test#test_createLink",
+  bug: 35670953
+},
+{
+  description: "multicast not supported in virtual device testing infra",
+  names: ["org.apache.harmony.tests.java.net.MulticastSocketTest#test_joinGroupLjava_net_InetAddress_IPv4",
+          "org.apache.harmony.tests.java.net.MulticastSocketTest#test_joinGroupLjava_net_SocketAddressLjava_net_NetworkInterface_IPv4_nullInterface",
+          "org.apache.harmony.tests.java.net.MulticastSocketTest#test_leaveGroupLjava_net_InetAddress_IPv4",
+          "org.apache.harmony.tests.java.net.MulticastSocketTest#test_sendLjava_net_DatagramPacketB_IPv4",
+          "org.apache.harmony.tests.java.net.MulticastSocketTest#test_setLoopbackModeSendReceive_IPv4"
+          ],
+  bug: 35922755
+},
+{
+  description: "Kernels between 4.4 and 4.9 interpret the backlog parameter differently than we
+                expect, causing this test to fail, and our emulators currently use those kernel
+                versions.  See b/31960002 for a full discussion and references to the upstream
+                changes.",
+  name: "libcore.javax.net.ServerSocketFactoryTest#testCreateServerSocketWithPortNoBacklog",
+  bug: 73535217
+}
+]

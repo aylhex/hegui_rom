@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- This test config is placed here for use by atest to enable it to determine
+     which tests to run for core-tests.jar (only). It assumes that the majority
+     of tests for libcore are in the CtsLibcoreTestCases module and therefore
+     does not help for tests where that is not the case.
+
+     This file is effectively a copy of the real CtsLibcoreTestCases
+     AndroidTest.xml file and should track the content of that file.
+
+     TODO: b/114773808 to remove this copied config and execute core-tests.jar
+     directly.
+-->
+<configuration description="Config for Libcore test cases">
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="mkdir -p /data/local/tmp/ctslibcore/java.io.tmpdir" />
+        <option name="run-command" value="mkdir -p /data/local/tmp/ctslibcore/user.home" />
+        <option name="teardown-command" value="rm -rf /data/local/tmp/ctslibcore" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <!-- this has just the instrumentation which acts as the tests we want to run -->
+        <option name="test-file-name" value="CtsLibcoreTestCases.apk" />
+    </target_preparer>
+    <test class="com.android.compatibility.testtype.LibcoreTest" >
+        <option name="package" value="android.libcore.cts" />
+        <option name="instrumentation-arg" key="filter"
+                value="com.android.cts.core.runner.ExpectationBasedFilter" />
+        <option name="core-expectation" value="/knownfailures.txt" />
+        <option name="runtime-hint" value="45m"/>
+        <!-- 20x default timeout of 600sec -->
+        <option name="shell-timeout" value="12000000"/>
+        <option name="hidden-api-checks" value="false"/>
+    </test>
+</configuration>

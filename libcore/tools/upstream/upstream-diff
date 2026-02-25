@@ -1,0 +1,108 @@
+#!/usr/bin/python
+#
+# Copyright (C) 2017 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+Compares one or more corresponding files from ojluni against one or
+more upstream or from upstreams against each other.
+The repositories (default: ojluni vs. expected current upstream) and
+the diff tool (default: meld) can be specified by command line options.
+
+This tool is for libcore maintenance; if you're not maintaining libcore,
+you won't need it (and might not have access to some of the instructions
+below).
+
+The naming of the repositories (expected, ojluni, 7u40, 8u121-b13,
+9b113+, 9+181) is based on the directory name where corresponding
+snapshots are stored when following the instructions at
+http://go/libcore-o-verify
+
+This in turn derives from the instructions at the top of:
+libcore/tools/upstream/src/main/java/libcore/CompareUpstreams.java
+
+Possible uses:
+
+To verify that ArrayList has been updated to the expected upstream
+and that all local patches carry change markers, we compare that
+file from ojluni against the expected upstream (the default):
+  upstream-diff java/util/ArrayList.java
+
+To verify multiple files:
+
+  upstream-diff java.util.ArrayList java.util.LinkedList
+
+Use a three-way merge to integrate changes from 9+181 into ArrayList:
+  upstream-diff -r 8u121-b13,ojluni,9+181 java/util/ArrayList.java
+or to investigate which version of upstream introduced a change:
+  upstream-diff -r 7u40,8u60,8u121-b13 java/util/ArrayList.java
+"""
+
+import argparse
+import os
+import os.path
+import re
+import subprocess
+import sys
+
+def run_diff(diff, repositories, rel_paths):
+    # Root of checked-out Android sources, set by the "lunch" command.
+    android_build_top = os.environ['ANDROID_BUILD_TOP']
+    # Root of repository snapshots. See go/libcore-o-verify for how you'd want to set this.
+    ojluni_upstreams = os.environ['OJLUNI_UPSTREAMS']
+    for rel_path in rel_paths:
+        # Paths end with a dot and lowercase file extension (.c, .java, ...) but
+        # fully qualified class names do not.
+        if ('/' not in rel_path) and (not re.match('.+\\.[a-z]{1,4}$', rel_path)):
+            # Assume a fully qualified class name
+            rel_path = rel_path.replace('.', '/') + '.java'
+        paths = []
+        for repository in repositories:
+            if repository == 'ojluni':
+                file_group = 'java/' if rel_path.endswith('.java') else 'native/'
+                paths.append('%s/libcore/ojluni/src/main/%s/%s'
+                             % (android_build_top, file_group, rel_path))
+            else:
+                paths.append('%s/%s/%s' % (ojluni_upstreams, repository, rel_path))
+        subprocess.call([diff] + paths)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Compare files between libcore/ojluni and ${OJLUNI_UPSTREAMS}.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, # include default values in help
+    )
+    upstreams = os.environ['OJLUNI_UPSTREAMS']
+    # natsort.natsorted() would be a nicer sort order, but I'd rather avoid the dependency
+    repositories = ['ojluni'] + sorted(
+        [d for d in os.listdir(upstreams) if os.path.isdir(os.path.join(upstreams, d))]
+    )
+    parser.add_argument('-r', '--repositories', default='ojluni,expected',
+                    help='Comma-separated list of 2-3 repositories, to compare, in order; '
+                          'available repositories: ' + ' '.join(repositories) + '.')
+    parser.add_argument('-d', '--diff', default='meld',
+                        help='Application to use for diffing.')
+    parser.add_argument('rel_path', nargs="+",
+                        help='File to compare: either a relative path below libcore/ojluni/'
+                             'src/main/{java,native}, or a fully qualified class name.')
+    args = parser.parse_args()
+    repositories = args.repositories.split(',')
+    if (len(repositories) < 2):
+        print('Expected >= 2 repositories to compare, got: ' + str(repositories))
+        parser.print_help()
+        sys.exit(1)
+    run_diff(args.diff, repositories, args.rel_path)
+
+if __name__ == "__main__":
+    main()
+

@@ -70,12 +70,12 @@ fastboot flashall -S 50M -w
 
 ## 用法
 1. 直接打开系统中集成的”合规检测APP“ ，按着下图中的流程进行操作即可开始检测
- ![](https://github.com/aylhex/hegui_rom/blob/main/aosp_rom/hegui.png)
+![](others/images/hegui.png)
 2. 保证电脑和手机处于同一局域网下，即手机和电脑连接同一个wifi
 3. 在电脑的浏览器中输入APP中展示的地址：`http://192.168.xxx.xxx:8080/`，即可看到检测结果
- ![](https://github.com/aylhex/hegui_rom/blob/main/aosp_rom/loginfo.png)
+ ![](others/images/loginfo.png)
 4. 点击详情，即可查看具体的调用堆栈
- ![](https://github.com/aylhex/hegui_rom/blob/main/aosp_rom/callstack.png)
+ ![](others/images/callstack.png)
 ## 更新
 1. 检测信息展示内容细分，更加便于快速捕捉违规信息。
 2. 修改检测逻辑，进一步增加对敏感信息获取的检测。

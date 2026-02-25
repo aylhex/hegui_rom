@@ -1,0 +1,92 @@
+This directory contains android activities and host-side tests relating to libcore memory metrics.
+
+Directory structure
+===================
+
+apps
+  - Android activities. See instructions below for use.
+
+host
+  - Host-side test code (which installs & runs activites). See instructions below for use.
+
+Running LibcoreHeapMetricsTest
+==============================
+
+You can manually run this as follows:
+
+  make tradefed-all libcore-memory-metrics-tests LibcoreHeapDumper ahat
+  tradefed.sh run commandAndExit template/local_min --template:map test=libcore-memory-metrics-tests
+
+This installs and runs the LibcoreHeapDumpActivity on the device, pulls the heaps back to the host,
+analyses them, and derives metrics. You can see the metrics in the tradefed output.
+
+Manually running HeapDumpInstrumentation
+========================================
+
+This instrumentation dumps a heap, performs some configurable action (see the code for details), and
+then dumps another heap. You can run it manually as follows:
+
+  make LibcoreHeapDumper
+  adb install -g -r ${ANDROID_PRODUCT_OUT}/data/app/LibcoreHeapDumper/LibcoreHeapDumper.apk
+
+  DEVICE_EXTERNAL_STORAGE=$(adb shell 'echo -n ${EXTERNAL_STORAGE}')
+  # Pick a suitable name here:
+  RELATIVE_DIR=dumps
+  adb shell mkdir ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}
+  # It's okay if this does nothing:
+  adb shell rm -r ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}/*
+  # Pick the action you want here:
+  DUMPER_ACTION=NOOP
+  adb shell am instrument -w -e dumpdir ${RELATIVE_DIR} -e action ${DUMPER_ACTION} libcore.heapdumper/.HeapDumpInstrumentation
+  adb shell ls ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}
+  # That normally shows before.hprof and after.hprof files. If it shows an error file, adb shell cat
+  # it to see what happened. If it doesn't show anything, adb logcat to see what happened.
+
+  LOCAL_DIR=/tmp
+  mkdir -p ${LOCAL_DIR}/${RELATIVE_DIR}
+  # It's okay if this does nothing:
+  rm -r ${LOCAL_DIR}/${RELATIVE_DIR}/*
+  adb pull ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR} ${LOCAL_DIR}
+  ls ${LOCAL_DIR}/${RELATIVE_DIR}
+
+  make ahat
+  # To examine the first heap dump:
+  ahat ${LOCAL_DIR}/${RELATIVE_DIR}/before.hprof
+  # Visit the localhost URL shown; ctrl-C to exit
+  # To diff the second heap dump against the first:
+  ahat ${LOCAL_DIR}/${RELATIVE_DIR}/after.hprof --baseline ${LOCAL_DIR}/${RELATIVE_DIR}/before.hprof
+
+  # To clean up:
+  rm -r ${LOCAL_DIR}/${RELATIVE_DIR}
+  adb shell rm -r ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}
+  adb uninstall libcore.heapdumper
+
+Manually running PssInstrumentation
+===================================
+
+This instrumentation measures the PSS in kB, performs some configurable action (see the code for
+details), and then measures the PSS again. You can run it manually as follows:
+
+  make LibcoreHeapDumper
+  adb install -g -r ${ANDROID_PRODUCT_OUT}/data/app/LibcoreHeapDumper/LibcoreHeapDumper.apk
+
+  DEVICE_EXTERNAL_STORAGE=$(adb shell 'echo -n ${EXTERNAL_STORAGE}')
+  # Pick a suitable name here:
+  RELATIVE_DIR=pss
+  adb shell mkdir ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}
+  # It's okay if this does nothing:
+  adb shell rm -r ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}/*
+  # Pick the action you want here:
+  DUMPER_ACTION=NOOP
+  adb shell am instrument -w -e dumpdir ${RELATIVE_DIR} -e action ${DUMPER_ACTION} libcore.heapdumper/.PssInstrumentation
+  adb shell ls ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}
+  # That normally shows before.pss.txt and after.pss.txt files. If it shows an error file, adb shell
+  # cat it to see what happened. If it doesn't show anything, adb logcat to see what happened.
+
+  # To see the PSS measurements in kB:
+  adb shell cat ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}/before.pss.txt
+  adb shell cat ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}/after.pss.txt
+
+  # To clean up:
+  adb shell rm -r ${DEVICE_EXTERNAL_STORAGE}/${RELATIVE_DIR}
+  adb uninstall libcore.heapdumper

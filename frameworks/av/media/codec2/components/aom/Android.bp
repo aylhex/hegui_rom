@@ -1,0 +1,14 @@
+cc_library_shared {
+    name: "libcodec2_soft_av1dec",
+    defaults: [
+        "libcodec2_soft-defaults",
+        "libcodec2_soft_sanitize_all-defaults",
+    ],
+
+    srcs: ["C2SoftAomDec.cpp"],
+    static_libs: ["libaom"],
+
+    include_dirs: [
+        "external/libaom/",
+    ],
+}

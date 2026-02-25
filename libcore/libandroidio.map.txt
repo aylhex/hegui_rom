@@ -1,0 +1,11 @@
+LIBANDROIDIO_1 {
+  global:
+    async_close_monitor_create;
+    async_close_monitor_destroy;
+    async_close_monitor_signal_blocked_threads;
+    async_close_monitor_static_init;
+    async_close_monitor_was_signalled;
+
+  local:
+    *;
+};

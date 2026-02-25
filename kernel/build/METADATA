@@ -1,0 +1,17 @@
+name: "kernel/build"
+description:
+    "Build scripts to build Android Kernels."
+
+third_party {
+  url {
+    type: HOMEPAGE
+    value: "https://source.android.com/setup/build/building-kernels"
+  }
+  url {
+    type: GIT
+    value: "https://android.googlesource.com/kernel/build"
+  }
+  version: ""
+  last_upgrade_date { year: 2019 month: 2 day: 1 }
+  license_type: NOTICE
+}
