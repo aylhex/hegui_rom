@@ -1,6 +1,6 @@
-package android.tal;
+package tal.ayl;
 
-import android.tal.ITalSecListener;
+import tal.ayl.ITalSecListener;
 
 /** @hide */
 interface ITalSecManager {

@@ -1,4 +1,4 @@
-package android.tal;
+package tal.ayl;
 
 /** @hide */
 interface ITalSecListener {

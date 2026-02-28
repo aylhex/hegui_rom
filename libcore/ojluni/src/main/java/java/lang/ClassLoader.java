@@ -356,9 +356,31 @@ public abstract class ClassLoader {
     // <p> Unless overridden, this method synchronizes on the result of
     // {@link #getClassLoadingLock <tt>getClassLoadingLock</tt>} method
     // during the entire class loading process.
+    // [TalSec] Hook for class loading
+    private static volatile java.util.function.Consumer<String> talClassLoadCallback = null;
+
+    // [TalSec] Hook for file operations
+    private static volatile java.util.function.Consumer<String> talFileOperationCallback = null;
+
+    /** @hide */
+    public static void checkFileOperation(String op) {
+        if (talFileOperationCallback != null) {
+            try { talFileOperationCallback.accept(op); } catch (Throwable t) {}
+        }
+    }
+
     protected Class<?> loadClass(String name, boolean resolve)
         throws ClassNotFoundException
     {
+            // [TalSec] Callback
+            if (talClassLoadCallback != null) {
+                try {
+                    talClassLoadCallback.accept(name);
+                } catch (Throwable t) {
+                    // ignore
+                }
+            }
+
             // First, check if the class has already been loaded
             Class<?> c = findLoadedClass(name);
             if (c == null) {

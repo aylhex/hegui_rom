@@ -51,8 +51,8 @@ java_defaults {
         ":framework-javastream-protos",
         // 自定义服务
         "core/java/tal/ayl/IMKOService.aidl",
-        "core/java/android/tal/ITalSecManager.aidl",
-        "core/java/android/tal/ITalSecListener.aidl",
+        "core/java/tal/ayl/ITalSecManager.aidl",
+        "core/java/tal/ayl/ITalSecListener.aidl",
 
         "core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl",
         "core/java/android/accessibilityservice/IAccessibilityServiceClient.aidl",

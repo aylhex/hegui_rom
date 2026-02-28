@@ -68,6 +68,7 @@ import android.util.TimingsTraceLog;
 import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.inputmethod.InputMethodSystemProperty;
+import android.tal.TalSecService;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;

@@ -1031,6 +1031,10 @@ public class File
         if (security != null) {
             security.checkDelete(path);
         }
+        
+        // [TalSec] Hook
+        java.lang.ClassLoader.checkFileOperation("java.io.File:delete>>>>File Delete:" + path);
+
         if (isInvalid()) {
             return false;
         }

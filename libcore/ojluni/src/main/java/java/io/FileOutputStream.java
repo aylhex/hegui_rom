@@ -250,6 +250,9 @@ class FileOutputStream extends OutputStream
 
         // Android-added: CloseGuard support.
         guard.open("close");
+        
+        // [TalSec] Hook
+        java.lang.ClassLoader.checkFileOperation("java.io.FileOutputStream:<init>>>>File Write:" + name);
     }
 
     // Android-removed: Documentation around SecurityException. Not thrown on Android.
