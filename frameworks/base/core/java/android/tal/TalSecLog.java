@@ -300,6 +300,15 @@ public class TalSecLog {
                 // Determine log_type based on action content
                 if (actionStr.startsWith("File Write:") || actionStr.startsWith("File Delete:")) {
                     logType = "FILE_MONITOR";
+                    
+                    int pathSep = actionStr.indexOf(":");
+                    if (pathSep != -1) {
+                        String op = actionStr.substring(0, pathSep);
+                        String path = actionStr.substring(pathSep + 1);
+                        
+                        stackJson.put("operation", op.replace("File ", "")); // Write or Delete
+                        stackJson.put("file_path", path);
+                    }
                 }
                 
                 stackJson.put("log_type", logType);
