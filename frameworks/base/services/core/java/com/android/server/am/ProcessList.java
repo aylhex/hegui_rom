@@ -1517,6 +1517,14 @@ public final class ProcessList {
                     runtimeFlags |= Zygote.DISABLE_VERIFIER;
                     Slog.w(TAG_PROCESSES, app + ": ART verification disabled");
                 }
+            } else {
+                // [AylSec] Check if this app is the target for JVMTI compliance injection
+                String targetPkg = android.os.SystemProperties.get("persist.sys.aylsec.target", "");
+                if (!targetPkg.isEmpty() && targetPkg.equals(app.info.packageName)) {
+                    Slog.i("AylSec", "ProcessList: Forcing DEBUG flags for target app: " + targetPkg);
+                    runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                    runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
+                }
             }
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.

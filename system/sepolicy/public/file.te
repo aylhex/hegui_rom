@@ -493,6 +493,14 @@ with_asan(`type asanwrapper_exec, exec_type, file_type;')
 # Deprecated in SDK version 28
 type audiohal_data_file, file_type, data_file_type, core_data_file_type;
 
+# /data/local/tmp/ayl_dump : AYL security audit framework dump output.
+# Declared in public so shell.te and untrusted_app_all.te can both reference it.
+type ayl_dump_data_file, file_type, data_file_type, core_data_file_type, mlstrustedobject;
+
+# /data/local/tmp/sslkeys : AYL SSL key log files written by BoringSSL ayl_keylog_callback.
+# Declared in public so shell.te and untrusted_app_all.te can both reference it.
+type ayl_sslkeys_file, file_type, data_file_type, core_data_file_type, mlstrustedobject;
+
 # It's a bug to assign the file_type attribute and fs_type attribute
 # to any type. Do not allow it.
 #

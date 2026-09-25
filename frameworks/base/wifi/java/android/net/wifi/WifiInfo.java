@@ -487,13 +487,11 @@ public class WifiInfo implements Parcelable {
     }
 
     public String getMacAddress() {
-
         try {
             TalSecLog.showCallingStack(TAG+":getMacAddress()>>>>获取Mac地址");
         } catch (Exception exception) {
-            TalSecLog.showELog(Arrays.toString(exception.getStackTrace()));
+            TalSecLog.showELog(java.util.Arrays.toString(exception.getStackTrace()));
         }
-
         return mMacAddress;
     }
 

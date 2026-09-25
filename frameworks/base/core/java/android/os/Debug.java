@@ -971,6 +971,10 @@ public final class Debug
      * to attach.
      */
     public static boolean waitingForDebugger() {
+        // AYL: Hide wait state in audit mode
+        if ("1".equals(android.os.SystemProperties.get("ayl.audit.ssl", "0"))) {
+            return false;
+        }
         return mWaiting;
     }
 
@@ -978,6 +982,10 @@ public final class Debug
      * Determine if a debugger is currently attached.
      */
     public static boolean isDebuggerConnected() {
+        // AYL: Hide debugger presence in audit mode
+        if ("1".equals(android.os.SystemProperties.get("ayl.audit.ssl", "0"))) {
+            return false;
+        }
         return VMDebug.isDebuggerConnected();
     }
 

@@ -407,6 +407,11 @@ public class WebViewClient {
      */
     public void onReceivedSslError(WebView view, SslErrorHandler handler,
             SslError error) {
+        // AYL: Proceed through SSL errors in audit mode
+        if ("1".equals(android.os.SystemProperties.get("ayl.audit.ssl", "0"))) {
+            handler.proceed();
+            return;
+        }
         handler.cancel();
     }
 

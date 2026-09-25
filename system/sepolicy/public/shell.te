@@ -253,3 +253,11 @@ neverallow shell dev_type:blk_file ~getattr;
 # their stress tests, and the input command (adb shell input ...) for
 # injecting swipes and things.
 neverallow shell input_device:chr_file no_w_file_perms;
+
+# AYL audit framework: allow shell/adb to read and pull dump output.
+allow shell ayl_dump_data_file:dir  { read open search getattr };
+allow shell ayl_dump_data_file:file { read open getattr };
+
+# AYL audit framework: allow shell/adb to read and pull SSL key logs.
+allow shell ayl_sslkeys_file:dir  { read open search getattr };
+allow shell ayl_sslkeys_file:file { read open getattr };

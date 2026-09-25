@@ -101,3 +101,7 @@ allow platform_app app_data_file:lnk_file create_file_perms;
 
 # app domains which access /dev/fuse should not run as platform_app
 neverallow platform_app fuse_device:chr_file *;
+
+# 允许 platform_app 读取已安装应用的 APK 文件
+allow platform_app apk_data_file:dir { getattr search };
+allow platform_app apk_data_file:file { getattr open read map ioctl lock };

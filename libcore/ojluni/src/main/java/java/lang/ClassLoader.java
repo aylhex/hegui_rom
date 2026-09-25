@@ -362,10 +362,38 @@ public abstract class ClassLoader {
     // [TalSec] Hook for file operations
     private static volatile java.util.function.Consumer<String> talFileOperationCallback = null;
 
+    // [TalSec] Hook for network operations
+    private static volatile java.util.function.BiConsumer<String, String> talNetworkCallback = null;
+
+    // [TalSec] Hook for raw network data (socketId, type: 0=Read/1=Write, data)
+    private static volatile java.util.function.Consumer<Object[]> talRawNetworkCallback = null;
+    private static volatile java.util.function.Consumer<Object[]> talRawNetworkMetaCallback = null;
+
     /** @hide */
     public static void checkFileOperation(String op) {
         if (talFileOperationCallback != null) {
             try { talFileOperationCallback.accept(op); } catch (Throwable t) {}
+        }
+    }
+
+    /** @hide */
+    public static void checkNetworkRequest(String url, String method) {
+        if (talNetworkCallback != null) {
+            try { talNetworkCallback.accept(url, method); } catch (Throwable t) {}
+        }
+    }
+
+    /** @hide */
+    public static void checkRawNetwork(int socketId, int type, byte[] data) {
+        if (talRawNetworkCallback != null) {
+            try { talRawNetworkCallback.accept(new Object[]{socketId, type, data}); } catch (Throwable t) {}
+        }
+    }
+
+    /** @hide */
+    public static void checkRawNetworkMeta(int socketId, String host, String scheme) {
+        if (talRawNetworkMetaCallback != null) {
+            try { talRawNetworkMetaCallback.accept(new Object[]{socketId, host, scheme}); } catch (Throwable t) {}
         }
     }
 

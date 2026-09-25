@@ -251,3 +251,7 @@ neverallow priv_app app_data_file:file no_x_file_perms;
 
 # Do not follow untrusted app provided symlinks
 neverallow priv_app app_data_file:lnk_file { open read getattr };
+
+# 允许 priv_app 读取 apk_data_file
+allow priv_app apk_data_file:dir { getattr search };
+allow priv_app apk_data_file:file { getattr open read map };

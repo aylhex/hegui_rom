@@ -639,6 +639,12 @@ abstract public class HttpURLConnection extends URLConnection {
                         s.checkPermission(new NetPermission("allowHttpTrace"));
                     }
                 }
+                
+                // [TalSec] Hook
+                try {
+                    java.lang.ClassLoader.checkNetworkRequest(this.url.toString(), method);
+                } catch (Throwable t) {}
+                
                 this.method = method;
                 return;
             }

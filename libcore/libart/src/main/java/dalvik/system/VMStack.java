@@ -98,6 +98,16 @@ public final class VMStack {
             getAnnotatedThreadStackTrace(Thread t);
 
     /**
+     * [AylSec] Retrieves the native physical stack trace ignoring reflection filters.
+     *
+     * @return a formatted string of the physical stack trace
+     * @hide
+     */
+    @libcore.api.CorePlatformApi
+    @FastNative
+    native public static String getNativePhysicalStackTrace();
+
+    /**
      * Retrieves a partial stack trace from the specified thread into
      * the provided array.
      *

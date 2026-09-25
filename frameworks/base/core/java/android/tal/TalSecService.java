@@ -2,10 +2,11 @@ package android.tal;
 
 import android.content.Context;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
+import org.json.JSONObject;
 import tal.ayl.ITalSecManager;
 import tal.ayl.ITalSecListener;
 
@@ -58,6 +59,47 @@ public class TalSecService extends ITalSecManager.Stub {
         if (listener != null) {
             mListeners.unregister(listener);
             Log.i(TAG, "Listener unregistered: " + Binder.getCallingPid());
+        }
+    }
+
+    static void reportBehaviorJson(JSONObject json) {
+        if (json == null) {
+            return;
+        }
+        reportBehaviorText(json.toString());
+    }
+
+    static void reportBehaviorText(String payload) {
+        try {
+            ITalSecManager service = ITalSecManager.Stub.asInterface(ServiceManager.getService("talsec"));
+            if (service != null) {
+                service.reportBehavior(payload);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    static void reportNetworkRequest(String url, String method, String callPkg) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("log_type", "NETWORK_MONITOR");
+            json.put("url", url);
+            json.put("method", method);
+            json.put("parse_failed", true);
+            json.put("call_pkg", callPkg);
+            reportBehaviorJson(json);
+        } catch (Exception ignored) {
+        }
+    }
+
+    static void reportSdkDetection(String sdkName, String className) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("log_type", "SDK_DETECT");
+            json.put("detected_sdk", sdkName);
+            json.put("class_name", className);
+            reportBehaviorJson(json);
+        } catch (Exception ignored) {
         }
     }
 }

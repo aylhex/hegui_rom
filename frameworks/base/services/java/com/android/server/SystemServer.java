@@ -2247,6 +2247,7 @@ public final class SystemServer {
                 reportWtf("Notifying incident daemon running", e);
             }
             traceEnd();
+            traceBeginAndSlog("StartTalSecService");
             try {
                 ServiceManager.addService("talsec", new TalSecService(context));
             } catch (Throwable e) {

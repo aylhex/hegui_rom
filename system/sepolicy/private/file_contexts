@@ -451,6 +451,8 @@
 /data/vendor/tombstones/wifi(/.*)? u:object_r:tombstone_wifi_data_file:s0
 /data/local/tmp(/.*)?	u:object_r:shell_data_file:s0
 /data/local/tmp/ltp(/.*)?   u:object_r:nativetest_data_file:s0
+/data/local/tmp/ayl_dump(/.*)?  u:object_r:ayl_dump_data_file:s0
+/data/local/tmp/sslkeys(/.*)?   u:object_r:ayl_sslkeys_file:s0
 /data/local/traces(/.*)?	u:object_r:trace_data_file:s0
 /data/media(/.*)?	u:object_r:media_rw_data_file:s0
 /data/mediadrm(/.*)?	u:object_r:media_data_file:s0

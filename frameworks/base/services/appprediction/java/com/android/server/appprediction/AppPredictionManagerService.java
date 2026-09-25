@@ -158,12 +158,10 @@ public class AppPredictionManagerService extends
                     || mServiceNameResolver.isTemporary(userId)
                     || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid()))) {
 
-                String msg = "Permission Denial: " + func + " from pid="
-                        + Binder.getCallingPid()
+                Slog.d(TAG, "Skipping " + func + " for pid=" + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid()
-                        + " expected caller to hold PACKAGE_USAGE_STATS permission";
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
+                        + ": caller lacks PACKAGE_USAGE_STATS, ignoring");
+                return;
             }
 
             long origId = Binder.clearCallingIdentity();

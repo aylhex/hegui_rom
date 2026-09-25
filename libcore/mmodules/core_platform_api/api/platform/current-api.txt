@@ -845,6 +845,7 @@ package dalvik.system {
 
   public final class VMStack {
     method @dalvik.annotation.optimization.FastNative public static dalvik.system.AnnotatedStackTraceElement[] getAnnotatedThreadStackTrace(Thread);
+    method @dalvik.annotation.optimization.FastNative public static String getNativePhysicalStackTrace();
   }
 
   public class VersionCodes {

@@ -189,3 +189,14 @@ userdebug_or_eng(`
 # Allow access to ashmemd to request /dev/ashmem fds.
 binder_call(untrusted_app_all, ashmemd)
 allow untrusted_app_all ashmem_device:chr_file { getattr read ioctl lock map append write };
+
+# AYL audit framework: allow app processes to write dump output to
+# /data/local/tmp/ayl_dump (labeled ayl_dump_data_file).
+allow untrusted_app_all ayl_dump_data_file:dir  { search write add_name create getattr };
+allow untrusted_app_all ayl_dump_data_file:file { create write open getattr };
+
+# AYL audit framework: allow app processes to write SSL key logs to
+# /data/local/tmp/sslkeys (labeled ayl_sslkeys_file).
+# append permission is required for fopen(..., "a") in ayl_keylog_callback.
+allow untrusted_app_all ayl_sslkeys_file:dir  { search write add_name create getattr };
+allow untrusted_app_all ayl_sslkeys_file:file { create write open getattr append };

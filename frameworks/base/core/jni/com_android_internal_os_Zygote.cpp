@@ -1036,8 +1036,30 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // privileged syscalls used below still need to be accessible in app process.
   SetUpSeccompFilter(uid, is_child_zygote);
 
+  // [AylSec] Create SSL key log directory BEFORE setresuid() while still root.
+  // mkdir/chmod on shell_data_file requires root; untrusted_app SELinux domain cannot do it.
+  if (!is_system_server &&
+      android::base::GetProperty("ayl.audit.ssl", "0") == "1") {
+    mkdir("/data/local/tmp/sslkeys", 01777);   // sticky+rwxrwxrwx; ignore EEXIST
+    chmod("/data/local/tmp/sslkeys", 01777);   // override umask
+    // Apply ayl_sslkeys_file SELinux label from file_contexts; without this the
+    // directory inherits shell_data_file from /data/local/tmp and App writes are denied.
+    selinux_android_restorecon("/data/local/tmp/sslkeys", 0);
+  }
+
   if (setresuid(uid, uid, uid) == -1) {
     fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
+  }
+
+  // [AylSec] SSL Key Logging: inject SSLKEYLOGFILE after setresuid() so the path
+  // encodes the correct app uid.  SSLKEYLOGFILE is NOT in bionic UNSAFE_VARIABLE_NAMES,
+  // so it survives __libc_init_AT_SECURE() and reaches dlopen'd libs (e.g. libcronet.*.so).
+  if (!is_system_server &&
+      android::base::GetProperty("ayl.audit.ssl", "0") == "1") {
+    const std::string keylog_path =
+        "/data/local/tmp/sslkeys/sslkeys-" + std::to_string(uid) + ".log";
+    setenv("SSLKEYLOGFILE", keylog_path.c_str(), 1 /* overwrite */);
+    ALOGD("[AylSec] SSLKEYLOGFILE set to %s for uid=%d", keylog_path.c_str(), uid);
   }
 
   // The "dumpable" flag of a process, which controls core dump generation, is

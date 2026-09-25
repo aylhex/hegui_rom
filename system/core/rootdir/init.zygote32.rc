@@ -3,6 +3,7 @@ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-sys
     priority -20
     user root
     group root readproc reserved_disk
+    setenv LD_PRELOAD /system/lib/libayl_audit_hook.so
     socket zygote stream 660 root system
     socket usap_pool_primary stream 660 root system
     onrestart write /sys/android_power/request_state wake

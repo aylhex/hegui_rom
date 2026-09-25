@@ -8,6 +8,8 @@
     activity_task_service
     adb_service
     adbd_exec
+    ayl_dump_data_file
+    ayl_sslkeys_file
     app_binding_service
     apex_data_file
     apex_metadata_file

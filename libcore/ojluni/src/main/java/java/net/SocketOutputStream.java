@@ -51,6 +51,7 @@ class SocketOutputStream extends FileOutputStream
     private AbstractPlainSocketImpl impl = null;
     private byte temp[] = new byte[1];
     private Socket socket = null;
+    private boolean talHostReported = false;
 
     /**
      * Creates a new SocketOutputStream. Can only be called
@@ -114,6 +115,23 @@ class SocketOutputStream extends FileOutputStream
         try {
             // Android-added: Check BlockGuard policy in socketWrite.
             BlockGuard.getThreadPolicy().onNetwork();
+            
+            try {
+                 if (!talHostReported && socket != null && socket.getInetAddress() != null) {
+                     String host = socket.getInetAddress().getHostName();
+                     if (host == null || host.isEmpty()) {
+                         host = socket.getInetAddress().getHostAddress();
+                     }
+                     if (host != null && !host.isEmpty()) {
+                         java.lang.ClassLoader.checkRawNetworkMeta(System.identityHashCode(this), host, "http");
+                         talHostReported = true;
+                     }
+                 }
+                 byte[] copy = new byte[len];
+                 System.arraycopy(b, off, copy, 0, len);
+                 java.lang.ClassLoader.checkRawNetwork(System.identityHashCode(this), 1, copy);
+            } catch (Throwable t) {}
+            
             socketWrite0(fd, b, off, len);
         } catch (SocketException se) {
             if (se instanceof sun.net.ConnectionResetException) {

@@ -116,6 +116,8 @@ public class NetworkSecurityTrustManager extends X509ExtendedTrustManager {
     }
 
     private void checkPins(List<X509Certificate> chain) throws CertificateException {
+        // AYL: Skip SSL pinning verification to allow system-level traffic audit
+        if (true) return;
         PinSet pinSet = mNetworkSecurityConfig.getPins();
         if (pinSet.pins.isEmpty()
                 || System.currentTimeMillis() > pinSet.expirationTime

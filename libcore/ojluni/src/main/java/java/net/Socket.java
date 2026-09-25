@@ -604,6 +604,12 @@ class Socket implements java.io.Closeable {
             throw new IllegalArgumentException("Unsupported address type");
 
         InetSocketAddress epoint = (InetSocketAddress) endpoint;
+        
+        // [TalSec] Hook
+        try {
+            java.lang.ClassLoader.checkNetworkRequest(epoint.toString(), "TCP_CONNECT");
+        } catch (Throwable t) {}
+        
         InetAddress addr = epoint.getAddress ();
         int port = epoint.getPort();
         checkAddress(addr, "connect");

@@ -347,4 +347,9 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.google.android.googlequicksearchbox">
+        <permission name="android.permission.READ_DREAM_STATE"/>
+        <permission name="android.permission.WRITE_DREAM_STATE"/>
+    </privapp-permissions>
+
 </permissions>

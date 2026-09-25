@@ -149,3 +149,7 @@ allow system_app system_server:udp_socket {
 
 # app domains which access /dev/fuse should not run as system_app
 neverallow system_app fuse_device:chr_file *;
+
+# 允许 system_app 读取已安装应用的 APK 文件 (apk_data_file)
+allow system_app apk_data_file:dir { getattr search };
+allow system_app apk_data_file:file { getattr open read map ioctl lock };

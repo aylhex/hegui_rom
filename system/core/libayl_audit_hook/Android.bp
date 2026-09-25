@@ -1,0 +1,22 @@
+cc_library_shared {
+    name: "libayl_audit_hook",
+    srcs: ["libayl_audit_hook.c"],
+
+    shared_libs: ["libdl"],
+
+    cflags: [
+        "-O2",
+        "-fvisibility=default",
+        "-Wall",
+        "-Wno-unused-parameter",
+    ],
+
+    // No C++ STL needed
+    stl: "none",
+
+    // Install to /system/lib and /system/lib64
+    compile_multilib: "both",
+
+    // Required: allow loading into system processes
+    allow_undefined_symbols: false,
+}

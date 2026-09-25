@@ -131,6 +131,8 @@ neverallow { all_untrusted_apps -mediaprovider } {
   -media_rw_data_file       # Internal storage. Known that apps can
                             # leave artfacts here after uninstall.
   -user_profile_data_file   # Access to profile files
+  -ayl_dump_data_file       # AYL audit framework dump output
+  -ayl_sslkeys_file         # AYL audit framework SSL key logs
   userdebug_or_eng(`
     -method_trace_data_file # only on ro.debuggable=1
     -coredump_file          # userdebug/eng only
